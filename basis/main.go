@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	micro "github.com/micro/go-micro"
-	"github.com/wotmshuaisi/gomicroexample/day1/proto"
+	"github.com/wotmshuaisi/gomicroexample/basis/proto"
 )
 
 // Greeter ...
@@ -25,8 +25,10 @@ func main() {
 	)
 	// init service (parse flag parameters)
 	service.Init()
+
 	// register rpc handler
 	proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+
 	// run server
 	if err := service.Run(); err != nil {
 		fmt.Println(err)

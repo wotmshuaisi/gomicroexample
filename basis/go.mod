@@ -1,4 +1,4 @@
-module github.com/wotmshuaisi/gomicroexample/day1
+module github.com/wotmshuaisi/gomicroexample/basis
 
 require (
 	github.com/go-log/log v0.1.0 // indirect
@@ -18,7 +18,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/pkg/errors v0.8.0 // indirect
-	golang.org/x/crypto v0.0.0-20181029021203-45a5f77698d3 // indirect
+	golang.org/x/crypto v0.0.0-20181029103014-dab2b1051b5d // indirect
 	golang.org/x/net v0.0.0-20181029044818-c44066c5c816 // indirect
 	golang.org/x/sys v0.0.0-20181026203630-95b1ffbd15a5 // indirect
 )
