@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	micro "github.com/micro/go-micro"
 	"github.com/wotmshuaisi/gomicroexample/day1/proto"
@@ -18,17 +19,16 @@ func (g *Greeter) Hello(ctx context.Context, req *proto.HelloRequest, resp *prot
 }
 
 func main() {
-	// create a new func
-	fnc := micro.NewFunction(
+	// new service
+	service := micro.NewService(
 		micro.Name("greeter"),
 	)
-
-	// init flag parameters
-	fnc.Init()
-
-	// register a handler
-	fnc.Handle(new(Greeter))
-
-	// run service
-	fnc.Run()
+	// init service (parse flag parameters)
+	service.Init()
+	// register rpc handler
+	proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+	// run server
+	if err := service.Run(); err != nil {
+		fmt.Println(err)
+	}
 }
