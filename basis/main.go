@@ -3,46 +3,46 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/micro/go-micro/server"
 
+	proto "github.com/wotmshuaisi/gomicroexample/basis/proto"
+
+	grpc "github.com/micro/go-grpc"
 	micro "github.com/micro/go-micro"
-	"github.com/wotmshuaisi/gomicroexample/basis/proto"
 )
 
-// Greeter ...
-type Greeter struct {
-}
+// Say ...
+type Say struct{}
 
-// Hello implementation
-func (g *Greeter) Hello(ctx context.Context, req *proto.HelloRequest, resp *proto.HelloResponse) error {
-	resp.Greeting = "Hello " + req.Name
+// Hello ...
+func (s *Say) Hello(ctx context.Context, req *proto.Request, rsp *proto.Response) error {
+	rsp.Msg = "Hello " + req.Name
 	return nil
 }
 
-// log wrapper
-func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
+// middleware
+func logMiddleware(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, rsp interface{}) error {
-		fmt.Printf("[%v] server request: %s\n", time.Now(), req.Method())
+		fmt.Printf("[%v] server request: %s", time.Now(), req.Method())
 		return fn(ctx, req, rsp)
 	}
 }
 
 func main() {
-	// new service
-	service := micro.NewService(
-		micro.Name("greeter"),
-		micro.WrapHandler(logWrapper),
+	service := grpc.NewService(
+		micro.Name("go.micro.srv.basis"),
+		micro.RegisterTTL(time.Second*30),
+		micro.RegisterInterval(time.Second*10),
+		micro.WrapHandler(logMiddleware),
 	)
-	// init service (parse flag parameters)
+
 	service.Init()
-
-	// register rpc handler
-	proto.RegisterGreeterHandler(service.Server(), new(Greeter))
-
-	// run server
-	if err := service.Run(); err != nil {
-		fmt.Println(err)
+	proto.RegisterSayHandler(service.Server(), new(Say))
+	err := service.Run()
+	if err != nil {
+		log.Fatal(err)
 	}
 }
