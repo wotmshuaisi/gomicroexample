@@ -26,7 +26,7 @@ func (s *Say) Hello(ctx context.Context, req *proto.Request, rsp *proto.Response
 // middleware
 func logMiddleware(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, rsp interface{}) error {
-		fmt.Printf("[%v] server request: %s", time.Now(), req.Method())
+		fmt.Printf("[%v] server request: %s\n", time.Now(), req.Method())
 		return fn(ctx, req, rsp)
 	}
 }
