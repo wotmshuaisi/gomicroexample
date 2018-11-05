@@ -3,7 +3,8 @@ package handler
 import (
 	"context"
 
-	grpc "github.com/micro/go-grpc"
+	"github.com/micro/go-micro/client"
+
 	"github.com/micro/go-log"
 
 	"github.com/labstack/echo"
@@ -15,12 +16,8 @@ type basisHandler struct {
 }
 
 func setBasisRouter(g *echo.Group) {
-	cc := grpc.NewService()
-	cc.Init()
-	cc.Client().Init()
-
 	h := &basisHandler{
-		C: proto.SayServiceClient("go.micro.srv.basis", cc.Client()),
+		C: proto.SayServiceClient("go.micro.srv.basis", client.DefaultClient),
 	}
 	g.POST("/hello", h.Hello)
 }

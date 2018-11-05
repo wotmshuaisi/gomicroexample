@@ -10,7 +10,6 @@ import (
 
 	proto "github.com/wotmshuaisi/gomicroexample/basis/proto"
 
-	grpc "github.com/micro/go-grpc"
 	micro "github.com/micro/go-micro"
 )
 
@@ -32,7 +31,7 @@ func logMiddleware(fn server.HandlerFunc) server.HandlerFunc {
 }
 
 func main() {
-	service := grpc.NewService(
+	service := micro.NewService(
 		micro.Name("go.micro.srv.basis"),
 		micro.RegisterTTL(time.Second*30),
 		micro.RegisterInterval(time.Second*10),
