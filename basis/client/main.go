@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	grpc "github.com/micro/go-grpc"
+	micro "github.com/micro/go-micro"
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/selector/cache"
 	proto "github.com/wotmshuaisi/gomicroexample/basis/proto"
 )
 
 func main() {
-	service := grpc.NewService()
+	service := micro.NewService()
 	service.Init()
 
 	c := service.Client()

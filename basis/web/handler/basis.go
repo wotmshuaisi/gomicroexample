@@ -15,9 +15,9 @@ type basisHandler struct {
 	C proto.SayService
 }
 
-func setBasisRouter(g *echo.Group) {
+func setBasisRouter(g *echo.Group, c client.Client) {
 	h := &basisHandler{
-		C: proto.SayServiceClient("go.micro.srv.basis", client.DefaultClient),
+		C: proto.SayServiceClient("go.micro.srv.basis", c),
 	}
 	g.POST("/hello", h.Hello)
 }
