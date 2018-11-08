@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/micro/go-micro/client"
 
@@ -32,7 +33,8 @@ func (b *basisHandler) Hello(c echo.Context) error {
 
 	r, err := b.C.Hello(context.TODO(), &proto.Request{Name: a["name"].(string)})
 	if err != nil {
-		return c.HTML(200, err.Error())
+		fmt.Println(err.Error())
+		return c.HTML(500, err.Error())
 	}
 	return c.HTML(200, r.Msg)
 }

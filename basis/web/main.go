@@ -3,10 +3,12 @@ package main
 import (
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+	hystrixplugin "github.com/micro/go-plugins/wrapper/breaker/hystrix"
+
 	"github.com/micro/go-log"
-	"github.com/micro/go-micro"
+	micro "github.com/micro/go-micro"
 	"github.com/micro/go-micro/client"
-	"github.com/micro/go-micro/selector/cache"
 	"github.com/micro/go-plugins/wrapper/select/roundrobin"
 	"github.com/micro/go-web"
 	"github.com/wotmshuaisi/gomicroexample/basis/web/handler"
@@ -18,21 +20,10 @@ func main() {
 		web.Version("latest"),
 		web.RegisterInterval(web.DefaultRegisterInterval),
 		web.RegisterTTL(web.DefaultRegisterTTL),
-		web.Address("localhost:8080"),
+		web.Address("0.0.0.0:8080"),
 	)
 
-	// client service
-	cService := micro.NewService(
-		micro.WrapClient(roundrobin.NewClientWrapper()),
-	)
-	cService.Init()
-
-	cc := cService.Client()
-	cc.Init(
-		client.Selector(cache.NewSelector(cache.TTL(time.Second * 120))),
-	)
-
-	s.Handle("/", handler.SetRouter(cc))
+	s.Handle("/", handler.SetRouter(newClient()))
 
 	if err := s.Init(); err != nil {
 		log.Fatal(err)
@@ -41,4 +32,30 @@ func main() {
 	if err := s.Run(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// init client
+func newClient() client.Client {
+	// override some value for breaker
+	hystrix.DefaultSleepWindow = 10000
+	hystrix.DefaultTimeout = 1500
+	hystrix.DefaultErrorPercentThreshold = 1
+	hystrix.DefaultVolumeThreshold = 1
+	hystrix.DefaultMaxConcurrent = 1
+	// hystrix web panel
+	// hs := hystrix.NewStreamHandler()
+	// hs.Start()
+	// go http.ListenAndServe(net.JoinHostPort("localhost", "8888"), hs)
+	// client service
+	cs := micro.NewService(
+		micro.WrapClient(roundrobin.NewClientWrapper()),
+		micro.WrapClient(hystrixplugin.NewClientWrapper()),
+	)
+	cs.Init()
+	c := cs.Client()
+	c.Init(
+		// client.Selector(cache.NewSelector(cache.TTL(time.Second*120))),
+		client.RequestTimeout(time.Second * 30),
+	)
+	return c
 }

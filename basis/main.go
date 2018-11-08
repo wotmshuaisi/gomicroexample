@@ -18,6 +18,7 @@ type Say struct{}
 
 // Hello ...
 func (s *Say) Hello(ctx context.Context, req *proto.Request, rsp *proto.Response) error {
+	time.Sleep(time.Second * 1)
 	rsp.Msg = "Hello " + req.Name
 	return nil
 }
