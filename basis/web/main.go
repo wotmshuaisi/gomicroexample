@@ -3,8 +3,11 @@ package main
 import (
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix"
 	hystrixplugin "github.com/micro/go-plugins/wrapper/breaker/hystrix"
+
+	rateplugin "github.com/micro/go-plugins/wrapper/ratelimiter/uber"
+
+	"github.com/afex/hystrix-go/hystrix"
 
 	"github.com/micro/go-log"
 	micro "github.com/micro/go-micro"
@@ -50,6 +53,7 @@ func newClient() client.Client {
 	cs := micro.NewService(
 		micro.WrapClient(roundrobin.NewClientWrapper()),
 		micro.WrapClient(hystrixplugin.NewClientWrapper()),
+		micro.WrapClient(rateplugin.NewClientWrapper(1)), // request count in persecond
 	)
 	cs.Init()
 	c := cs.Client()

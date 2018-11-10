@@ -33,6 +33,7 @@ func (b *basisHandler) Hello(c echo.Context) error {
 
 	r, err := b.C.Hello(context.TODO(), &proto.Request{Name: a["name"].(string)})
 	if err != nil {
+		fmt.Print("err:")
 		fmt.Println(err.Error())
 		return c.HTML(500, err.Error())
 	}
