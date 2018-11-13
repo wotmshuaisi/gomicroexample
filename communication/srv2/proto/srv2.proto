@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package go.micro.srv.srv2;
+
+service Srv2 {
+    rpc Square (Request) returns (Response);
+}
+
+message Request {
+    int64 x = 1;
+    int64 y = 2; 
+}
+
+message Response {
+    int64 result = 1; 
+}

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package go.micro.srv.srv3;
+
+service Srv3 {
+    rpc GetServiceName (Request) returns (Response);
+}
+
+message Request {
+}
+
+
+message Response {
+    string result = 1; 
+}
