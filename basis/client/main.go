@@ -23,7 +23,7 @@ func main() {
 
 	cHandler := proto.SayServiceClient("go.micro.srv.basis", c)
 
-	resp, err := cHandler.Hello(context.TODO(), &proto.Request{Name: "Charlie"})
+	resp, err := cHandler.Hello(context.TODO(), &proto.Request{Name: "wotmshuaisi"})
 	if err != nil {
 		fmt.Println(err)
 		return
