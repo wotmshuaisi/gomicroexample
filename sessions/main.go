@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/sessions"
+
 	"github.com/boj/redistore"
 
 	"github.com/labstack/echo-contrib/session"
@@ -12,44 +14,67 @@ import (
 	"github.com/labstack/echo"
 )
 
-func get(c echo.Context) error {
-	sess, err := session.Get("name", c)
-	if err != nil || sess.Values["name"] == nil {
-		return c.HTML(http.StatusOK, `
-		<button onclick="rr()">click</button>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script>
-    function rr() {
-        $.ajax({
-            url: '/',
-            type: 'post',
-            async: false,
-            contentType: "application/json",
-            data: JSON.stringify({
-                "name": "wotmshuaisi"
-            }),
-            success: function (arg) {
-                document.write(arg)
-            }
-        });
-    }
-</script>
-		`)
-	}
-	c.SetCookie(&http.Cookie{})
-	return c.HTML(200, sess.Values["name"].(string))
+type handler struct {
 }
 
-func post(c echo.Context) error {
+func (h *handler) SessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sess, _ := session.Get("_user_session", c)
+		fmt.Println(sess)
+		c.Set("session", sess.Values)
+		next(c)
+		return nil
+	}
+}
+
+func (h *handler) get(c echo.Context) error {
+	// sess, err := session.Get("_user_session", c)
+	// fmt.Println(sess.Values["id"])
+	// fmt.Println(reflect.TypeOf(sess.Values["id"]))
+
+	sess := c.Get("session").(map[interface{}]interface{})
+
+	if sess["name"] == nil {
+		return c.HTML(http.StatusOK, `
+			<button onclick="rr()">click</button>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script>
+	    function rr() {
+	        $.ajax({
+	            url: '/',
+	            type: 'post',
+	            async: false,
+	            contentType: "application/json",
+	            data: JSON.stringify({
+	                "name": "wotmshuaisi"
+	            }),
+	            success: function (arg) {
+	                document.write(arg)
+	            }
+	        });
+	    }
+	</script>
+			`)
+	}
+	c.SetCookie(&http.Cookie{})
+	return c.HTML(200, sess["name"].(string))
+}
+
+func (h *handler) post(c echo.Context) error {
 	var payload map[string]interface{}
 	err := c.Bind(&payload)
 	if err != nil {
 		return c.HTML(http.StatusBadRequest, err.Error())
 	}
-	sess, _ := session.Get("name", c)
+	sess, _ := session.Get("_user_session", c)
 	sess.Values["name"] = payload["name"]
+	sess.Values["id"] = 111
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: false,
+	}
 	err = sess.Save(c.Request(), c.Response())
-	fmt.Println(err)
 	return c.JSON(http.StatusOK, payload)
 }
 
@@ -64,8 +89,10 @@ func main() {
 	e.Use(session.Middleware(
 		r,
 	))
-	e.GET("/", get)
-	e.POST("/", post)
+	h := handler{}
+	e.Use(h.SessionMiddleware)
+	e.GET("/", h.get)
+	e.POST("/", h.post)
 	if err := e.Start(":8080"); err != nil {
 		log.Fatal(err)
 	}
