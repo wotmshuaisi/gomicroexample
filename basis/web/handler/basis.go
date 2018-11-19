@@ -25,16 +25,14 @@ func setBasisRouter(g *echo.Group, c client.Client) {
 	// g.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 	// 	Level: 5,
 	// }))
-	// g.Use(tracerMiddleware("go.micro.web.basis"))
+	g.Use(tracerMiddleware("go.micro.web.basis"))
 	g.POST("/hello", h.Hello)
 }
 
 func (b *basisHandler) Hello(c echo.Context) error {
-	// sp := c.Get(trackerspan).(opentracing.Span)
-	span := opentracing.GlobalTracer().StartSpan(c.Request().URL.Path)
-	defer span.Finish()
-	ctx := opentracing.ContextWithSpan(context.TODO(), span)
-	opentracing.GlobalTracer().Inject
+	span := c.Get(trackerspan).(opentracing.Span)
+	ctx := c.Get(trackerctx).(context.Context)
+
 	a := map[string]interface{}{}
 	err := c.Bind(&a)
 	if err != nil || a["name"].(string) == "" {
