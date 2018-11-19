@@ -1,22 +1,13 @@
 package main
 
 import (
-	"io"
 	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
-
-	uberprometheus "github.com/uber/jaeger-lib/metrics/prometheus"
 
 	ocplugin "github.com/micro/go-plugins/wrapper/trace/opentracing"
 
 	hystrixplugin "github.com/micro/go-plugins/wrapper/breaker/hystrix"
 
 	opentracing "github.com/opentracing/opentracing-go"
-	jaeger "github.com/uber/jaeger-client-go"
-	jaegercfg "github.com/uber/jaeger-client-go/config"
-	jaegerlog "github.com/uber/jaeger-client-go/log"
-	"github.com/uber/jaeger-lib/metrics"
 
 	rateplugin "github.com/micro/go-plugins/wrapper/ratelimiter/uber"
 
@@ -27,6 +18,7 @@ import (
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-plugins/wrapper/select/roundrobin"
 	"github.com/micro/go-web"
+	"github.com/wotmshuaisi/gomicroexample/basis/tracer"
 	"github.com/wotmshuaisi/gomicroexample/basis/web/handler"
 )
 
@@ -35,7 +27,7 @@ var (
 )
 
 func main() {
-	t, io, err := newTracer(servicename, "localhost:6831")
+	t, io, err := tracer.NewTracer(servicename, "localhost:6831")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,48 +79,4 @@ func newClient(t opentracing.Tracer) client.Client {
 		client.RequestTimeout(time.Second * 30),
 	)
 	return c
-}
-
-func newTracer(servicename string, addr string) (opentracing.Tracer, io.Closer, error) {
-	// Sample configuration for testing. Use constant sampling to sample every trace
-	// and enable LogSpan to log every span via configured Logger.
-	cfg := jaegercfg.Configuration{
-		ServiceName: servicename,
-		Sampler: &jaegercfg.SamplerConfig{
-			Type:  jaeger.SamplerTypeConst,
-			Param: 1,
-		},
-		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans:            true,
-			BufferFlushInterval: 1 * time.Second,
-		},
-	}
-
-	// Example logger and metrics factory. Use github.com/uber/jaeger-client-go/log
-	// and github.com/uber/jaeger-lib/metrics respectively to bind to real logging and metrics
-	// frameworks.
-	jLogger := jaegerlog.StdLogger
-	jMetricsFactory := metrics.NullFactory
-
-	// registry :=
-
-	metricsFactory := uberprometheus.New(uberprometheus.WithRegisterer(prometheus.NewPedanticRegistry()))
-	mObj := jaeger.NewMetrics(metricsFactory, nil)
-
-	sender, err := jaeger.NewUDPTransport(addr, 0)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	reporter := jaeger.NewRemoteReporter(sender, jaeger.ReporterOptions.Metrics(mObj))
-	// Initialize tracer with a logger and a metrics factory
-	tracer, closer, err := cfg.NewTracer(
-		jaegercfg.Logger(jLogger),
-		jaegercfg.Metrics(jMetricsFactory),
-		jaegercfg.Reporter(reporter),
-	)
-	// Set the singleton opentracing.Tracer with the Jaeger tracer.
-	// opentracing.SetGlobalTracer(tracer)
-
-	return tracer, closer, err
 }
