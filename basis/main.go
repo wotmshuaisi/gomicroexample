@@ -57,7 +57,7 @@ func main() {
 
 	service.Init()
 	proto.RegisterSayHandler(service.Server(), new(Say))
-	err = service.Run()
+	err := service.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
