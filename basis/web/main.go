@@ -67,6 +67,7 @@ func newClient(t opentracing.Tracer) client.Client {
 	// go http.ListenAndServe(net.JoinHostPort("localhost", "8888"), hs)
 	// client service
 	cs := micro.NewService(
+		// middlewares executes in reverse order
 		micro.WrapClient(roundrobin.NewClientWrapper()),
 		micro.WrapClient(hystrixplugin.NewClientWrapper()),
 		micro.WrapClient(rateplugin.NewClientWrapper(1)), // request count in persecond
