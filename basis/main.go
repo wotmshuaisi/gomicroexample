@@ -8,6 +8,7 @@ import (
 
 	ocplugin "github.com/micro/go-plugins/wrapper/trace/opentracing"
 
+	"github.com/micro/go-micro/metadata"
 	"github.com/micro/go-micro/server"
 	opentracing "github.com/opentracing/opentracing-go"
 
@@ -25,9 +26,20 @@ var (
 type Say struct {
 }
 
-func aa(ctx context.Context, name string) (res string) {
-	// if you want keep calling functions , keep the ctx
-	sp, _ := opentracing.StartSpanFromContext(ctx, "aa")
+func extractSpanContext(ctx context.Context, name string) opentracing.Span {
+	md, ok := metadata.FromContext(ctx)
+	if !ok {
+		md = make(map[string]string)
+	}
+	var sp opentracing.Span
+	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
+	sp = opentracing.StartSpan(name, opentracing.ChildOf(wireContext))
+	return sp
+}
+
+func aa(ctx opentracing.SpanContext, name string) (res string) {
+	// Inheritance spancontext
+	sp := opentracing.StartSpan("aa", opentracing.ChildOf(ctx))
 	sp.SetTag("name", name)
 
 	defer func() {
@@ -41,7 +53,7 @@ func aa(ctx context.Context, name string) (res string) {
 
 // Hello ...
 func (s *Say) Hello(ctx context.Context, req *proto.Request, rsp *proto.Response) error {
-	sp := opentracing.SpanFromContext(ctx)
+	sp := extractSpanContext(ctx, "Hello")
 	sp.SetTag("req", req)
 
 	defer func() {
@@ -51,7 +63,7 @@ func (s *Say) Hello(ctx context.Context, req *proto.Request, rsp *proto.Response
 
 	msg := "Hello " + req.Name
 
-	rsp.Msg = aa(ctx, msg)
+	rsp.Msg = aa(sp.Context(), msg)
 
 	return nil
 }
