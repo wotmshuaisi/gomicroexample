@@ -1,0 +1,60 @@
+basePath: /v1
+definitions:
+  handlers.user:
+    properties:
+      id:
+        type: integer
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample server Petstore server.
+  license: {}
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /user/get:
+    get:
+      description: get user info
+      parameters:
+      - description: token
+        in: header
+        name: X-Token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.user'
+            type: object
+  /user/post:
+    post:
+      consumes:
+      - application/json
+      description: modify user info
+      parameters:
+      - description: token
+        in: header
+        name: X-Token
+        required: true
+        type: string
+      - description: user info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.user'
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+swagger: "2.0"

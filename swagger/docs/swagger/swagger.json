@@ -1,0 +1,91 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample server Petstore server.",
+        "title": "Swagger Example API",
+        "contact": {},
+        "license": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/v1",
+    "paths": {
+        "/user/get": {
+            "get": {
+                "description": "get user info",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "X-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/handlers.user"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/post": {
+            "post": {
+                "description": "modify user info",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "X-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "user info",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/handlers.user"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.user": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
