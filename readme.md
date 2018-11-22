@@ -6,7 +6,7 @@ Some fragments about Go-micro service
 
 a simple example about `Say Hello` just like official site, below you can see it including more features
 
-- functions calling tracking
+- functions calling tracing
 - custom service middleware
 - roudnrobin through service discovery
 - circuit breaker
