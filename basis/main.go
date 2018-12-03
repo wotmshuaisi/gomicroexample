@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
+
+	"github.com/micro/go-log"
 
 	ocplugin "github.com/micro/go-plugins/wrapper/trace/opentracing"
 
