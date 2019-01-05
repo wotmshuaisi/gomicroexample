@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/gorilla/sessions"
 
 	"github.com/boj/redistore"
 
-	"github.com/labstack/echo-contrib/session"
-
 	"github.com/labstack/echo"
+	"github.com/labstack/echo-contrib/session"
 )
 
 type handler struct {
@@ -79,7 +79,8 @@ func (h *handler) post(c echo.Context) error {
 }
 
 func main() {
-	r, err := redistore.NewRediStore(10, "tcp", "localhost:6379", "", []byte("sessions"))
+
+	r, err := redistore.NewRediStore(10, "tcp", "127.0.0.1:6379", "", []byte("sessions"))
 
 	if err != nil {
 		log.Fatal(err)
@@ -93,7 +94,9 @@ func main() {
 	e.Use(h.SessionMiddleware)
 	e.GET("/", h.get)
 	e.POST("/", h.post)
-	if err := e.Start(":8080"); err != nil {
+	fmt.Println("1")
+	go http.ListenAndServe("localhost:6060", nil)
+	if err := http.ListenAndServe(":8080", e); err != nil {
 		log.Fatal(err)
 	}
 }
